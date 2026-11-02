@@ -31,6 +31,12 @@ const defaultSettings = {
     link: "/catalogo",
     variant: "orange",
   },
+  hideOutOfStock: false,
+  hideLocalSupplier: false,
+  hideElitSupplier: false,
+  hiddenBrands: [],
+  hiddenCategories: [],
+  hiddenProductIds: [],
   updatedAt: 1,
 };
 

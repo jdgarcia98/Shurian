@@ -31,7 +31,19 @@ import {
   LogOut,
   UserCheck,
   ShieldAlert,
+  Sliders,
+  Filter,
+  Search,
+  Check,
+  Layers,
+  Boxes,
+  Truck,
+  Archive,
+  RefreshCw,
 } from "lucide-react";
+
+import { INITIAL_PRODUCTS } from "@/data/products";
+import { Product } from "@/types";
 
 export default function AdminPage() {
   const {
@@ -55,10 +67,18 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Admin Dashboard state
-  const [activeTab, setActiveTab] = useState<"metrics" | "settings">("metrics");
+  const [activeTab, setActiveTab] = useState<"metrics" | "settings" | "catalog">("metrics");
   const [formData, setFormData] = useState({ ...settings });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Catalog tab filters & live products state
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [catalogBrands, setCatalogBrands] = useState<string[]>([]);
+  const [catalogCategories, setCatalogCategories] = useState<{ nombre: string; uri: string }[]>([]);
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [catalogSupplierFilter, setCatalogSupplierFilter] = useState<"todos" | "local" | "elit">("todos");
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
 
   // Check auth session on mount (ONLY ONCE on mount)
   useEffect(() => {
@@ -66,6 +86,34 @@ export default function AdminPage() {
     fetchSettings().then(() => {
       setFormData(useAdminStore.getState().settings);
     });
+
+    // Preload live categories, brands and initial products for catalog admin
+    const loadCatalogData = async () => {
+      try {
+        setLoadingCatalog(true);
+        const [catRes, prodRes] = await Promise.all([
+          fetch("/api/categories"),
+          fetch("/api/products?limit=80"),
+        ]);
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          if (catData.marcas) setCatalogBrands(catData.marcas);
+          if (catData.categorias) setCatalogCategories(catData.categorias);
+        }
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData.products && Array.isArray(prodData.products)) {
+            setCatalogProducts([...INITIAL_PRODUCTS, ...prodData.products]);
+          }
+        }
+      } catch (e) {
+        console.error("Error loading catalog data for admin:", e);
+      } finally {
+        setLoadingCatalog(false);
+      }
+    };
+
+    loadCatalogData();
 
     const checkSession = async () => {
       try {
@@ -87,8 +135,8 @@ export default function AdminPage() {
   }, []); // Note: Run only on mount to prevent wiping user input
 
   // Switch tab safely
-  const handleTabChange = (tab: "metrics" | "settings") => {
-    if (tab === "settings") {
+  const handleTabChange = (tab: "metrics" | "settings" | "catalog") => {
+    if (tab === "settings" || tab === "catalog") {
       setFormData(useAdminStore.getState().settings);
     }
     setActiveTab(tab);
@@ -170,6 +218,49 @@ export default function AdminPage() {
       await resetSettings();
       setFormData(useAdminStore.getState().settings);
     }
+  };
+
+  // Helper toggle functions for Catalog tab
+  const toggleHiddenProduct = async (id: string) => {
+    const currentList = formData.hiddenProductIds || [];
+    const isHidden = currentList.includes(id);
+    const updated = isHidden
+      ? currentList.filter((x) => x !== id)
+      : [...currentList, id];
+    
+    const newFormData = { ...formData, hiddenProductIds: updated };
+    setFormData(newFormData);
+    await updateSettings({ hiddenProductIds: updated });
+  };
+
+  const toggleHiddenBrand = async (brandName: string) => {
+    const currentList = formData.hiddenBrands || [];
+    const isHidden = currentList.includes(brandName);
+    const updated = isHidden
+      ? currentList.filter((x) => x !== brandName)
+      : [...currentList, brandName];
+    
+    const newFormData = { ...formData, hiddenBrands: updated };
+    setFormData(newFormData);
+    await updateSettings({ hiddenBrands: updated });
+  };
+
+  const toggleHiddenCategory = async (catName: string) => {
+    const currentList = formData.hiddenCategories || [];
+    const isHidden = currentList.includes(catName);
+    const updated = isHidden
+      ? currentList.filter((x) => x !== catName)
+      : [...currentList, catName];
+    
+    const newFormData = { ...formData, hiddenCategories: updated };
+    setFormData(newFormData);
+    await updateSettings({ hiddenCategories: updated });
+  };
+
+  const toggleSettingBoolean = async (key: "hideOutOfStock" | "hideLocalSupplier" | "hideElitSupplier", val: boolean) => {
+    const newFormData = { ...formData, [key]: val };
+    setFormData(newFormData);
+    await updateSettings({ [key]: val });
   };
 
   // Mock analytics dataset based on selected timeframe
@@ -436,10 +527,10 @@ export default function AdminPage() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-4 border-t border-zinc-800/60 pt-3">
+          <div className="flex items-center gap-2 mt-4 border-t border-zinc-800/60 pt-3 overflow-x-auto pb-1 sm:pb-0">
             <button
               onClick={() => handleTabChange("metrics")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "metrics"
                   ? "bg-orange-500 text-white shadow-glow-orange-sm"
                   : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
@@ -451,7 +542,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => handleTabChange("settings")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "settings"
                   ? "bg-orange-500 text-white shadow-glow-orange-sm"
                   : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
@@ -459,6 +550,18 @@ export default function AdminPage() {
             >
               <Settings className="w-4 h-4" />
               <span>Configuración del Negocio</span>
+            </button>
+
+            <button
+              onClick={() => handleTabChange("catalog")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                activeTab === "catalog"
+                  ? "bg-orange-500 text-white shadow-glow-orange-sm"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              }`}
+            >
+              <Boxes className="w-4 h-4" />
+              <span>Control de Catálogo & Stock</span>
             </button>
           </div>
         </div>
@@ -1173,6 +1276,390 @@ export default function AdminPage() {
               </button>
             </div>
           </form>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 3: CATALOG & INVENTORY VISIBILITY CONTROL                */}
+        {/* ============================================================ */}
+        {activeTab === "catalog" && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Intro Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-900/50 p-5 rounded-2xl border border-zinc-800/80">
+              <div>
+                <h2 className="text-base font-headline font-bold text-white flex items-center gap-2">
+                  <Boxes className="w-5 h-5 text-orange-500" />
+                  Control de Visibilidad de Productos y Proveedores
+                </h2>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Decide qué productos, proveedores o marcas se muestran en la tienda pública y oculta los que no tengan stock.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                <span className="px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono">
+                  {catalogProducts.length} productos cargados
+                </span>
+              </div>
+            </div>
+
+            {/* SECCIÓN 1: REGLAS GLOBALES Y PROVEEDORES */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Card 1: Filtro de Stock Cero */}
+              <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                      <Archive className="w-4 h-4 text-amber-400" />
+                      Filtro Sin Stock
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.hideOutOfStock ?? false}
+                        onChange={(e) => toggleSettingBoolean("hideOutOfStock", e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500" />
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Si está activado, <span className="text-white font-medium">oculta automáticamente de toda la web</span> cualquier producto cuyo stock sea 0.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Estado:</span>
+                  <span className={formData.hideOutOfStock ? "text-orange-400 font-bold" : "text-zinc-500"}>
+                    {formData.hideOutOfStock ? "OCULTANDO SIN STOCK" : "MOSTRANDO TODO"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: Proveedor Elit Mayorista */}
+              <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-blue-400" />
+                      Proveedor: Elit Mayorista
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!(formData.hideElitSupplier ?? false)}
+                        onChange={(e) => toggleSettingBoolean("hideElitSupplier", !e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500" />
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Productos conectados en tiempo real mediante la API oficial de Elit con precios mayoristas y stock.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Visibilidad:</span>
+                  <span className={!formData.hideElitSupplier ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                    {!formData.hideElitSupplier ? "ACTIVO / VISIBLE" : "OCULTO EN LA WEB"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Stock Propio Local Shurian */}
+              <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                      <Store className="w-4 h-4 text-orange-400" />
+                      Stock Local (Shurian Rosario)
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!(formData.hideLocalSupplier ?? false)}
+                        onChange={(e) => toggleSettingBoolean("hideLocalSupplier", !e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500" />
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Artículos curados propios del local (vidrios, fundas, cables, teclados, servicios técnicos en Bv. Segui 1501).
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Visibilidad:</span>
+                  <span className={!formData.hideLocalSupplier ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                    {!formData.hideLocalSupplier ? "ACTIVO / VISIBLE" : "OCULTO EN LA WEB"}
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* SECCIÓN 2: CONTROL POR MARCAS Y CATEGORÍAS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Col A: Filtro por Marcas */}
+              <div className="bg-zinc-900/70 border border-zinc-800 p-5 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                  <div className="flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-orange-400" />
+                    <h3 className="text-sm font-headline font-bold text-white">
+                      Ocultar / Mostrar por Marca
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-zinc-500 font-mono">
+                    {formData.hiddenBrands?.length || 0} marcas ocultas
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  Toca una marca para ocultar o volver a mostrar todos los productos asociados a ella:
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto p-1 pr-2 custom-scrollbar">
+                  {catalogBrands.map((brand) => {
+                    const isHidden = formData.hiddenBrands?.includes(brand);
+                    return (
+                      <button
+                        key={brand}
+                        type="button"
+                        onClick={() => toggleHiddenBrand(brand)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium border transition-all flex items-center gap-1.5 ${
+                          isHidden
+                            ? "bg-rose-500/15 border-rose-500/40 text-rose-300 line-through opacity-70 hover:opacity-100"
+                            : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                        }`}
+                      >
+                        {isHidden ? <EyeOff className="w-3 h-3 text-rose-400" /> : <Eye className="w-3 h-3 text-emerald-400" />}
+                        <span>{brand}</span>
+                      </button>
+                    );
+                  })}
+                  {catalogBrands.length === 0 && (
+                    <span className="text-xs text-zinc-500">Cargando marcas del catálogo...</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Col B: Filtro por Categorías */}
+              <div className="bg-zinc-900/70 border border-zinc-800 p-5 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-blue-400" />
+                    <h3 className="text-sm font-headline font-bold text-white">
+                      Ocultar / Mostrar por Categoría
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-zinc-500 font-mono">
+                    {formData.hiddenCategories?.length || 0} categorías ocultas
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  Toca una categoría para bloquear temporalmente su exhibición en el catálogo:
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto p-1 pr-2 custom-scrollbar">
+                  {catalogCategories.map((cat) => {
+                    const isHidden = formData.hiddenCategories?.includes(cat.nombre);
+                    return (
+                      <button
+                        key={cat.nombre}
+                        type="button"
+                        onClick={() => toggleHiddenCategory(cat.nombre)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                          isHidden
+                            ? "bg-rose-500/15 border-rose-500/40 text-rose-300 line-through opacity-70 hover:opacity-100"
+                            : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                        }`}
+                      >
+                        {isHidden ? <EyeOff className="w-3 h-3 text-rose-400" /> : <Eye className="w-3 h-3 text-emerald-400" />}
+                        <span>{cat.nombre}</span>
+                      </button>
+                    );
+                  })}
+                  {catalogCategories.length === 0 && (
+                    <span className="text-xs text-zinc-500">Cargando categorías del catálogo...</span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* SECCIÓN 3: GESTIÓN PRODUCTO POR PRODUCTO */}
+            <div className="bg-zinc-900/70 border border-zinc-800 p-6 rounded-2xl space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+                <div>
+                  <h3 className="text-base font-headline font-bold text-white flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-orange-400" />
+                    Listado de Productos (Activar / Desactivar Individualmente)
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Busca productos específicos y alterna su visibilidad con un solo clic.
+                  </p>
+                </div>
+
+                {/* Filtro de proveedor para la tabla */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
+                    {(
+                      [
+                        { id: "todos", label: "Todos" },
+                        { id: "local", label: "Local" },
+                        { id: "elit", label: "Elit" },
+                      ] as const
+                    ).map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setCatalogSupplierFilter(f.id)}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          catalogSupplierFilter === f.id
+                            ? "bg-zinc-800 text-orange-400 font-semibold"
+                            : "text-zinc-400 hover:text-zinc-200"
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  type="text"
+                  value={catalogSearch}
+                  onChange={(e) => setCatalogSearch(e.target.value)}
+                  placeholder="Buscar por nombre, marca o categoría para ocultar o mostrar..."
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {/* Table / List */}
+              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                {catalogProducts
+                  .filter((p) => {
+                    // Supplier filter
+                    const isElit = p.id.startsWith("elit-") || p.supplier === "elit";
+                    if (catalogSupplierFilter === "local" && isElit) return false;
+                    if (catalogSupplierFilter === "elit" && !isElit) return false;
+
+                    // Text search
+                    if (catalogSearch.trim()) {
+                      const q = catalogSearch.toLowerCase();
+                      const name = (p.name || "").toLowerCase();
+                      const brand = (p.specs?.["Marca"] || "").toLowerCase();
+                      const cat = (p.categoryLabel || "").toLowerCase();
+                      return name.includes(q) || brand.includes(q) || cat.includes(q);
+                    }
+                    return true;
+                  })
+                  .slice(0, 80)
+                  .map((product) => {
+                    const isElit = product.id.startsWith("elit-") || product.supplier === "elit";
+                    const isHiddenExplicitly = formData.hiddenProductIds?.includes(product.id);
+                    const isOutOfStock = !product.inStock;
+                    const isHiddenByStock = formData.hideOutOfStock && isOutOfStock;
+                    const isHiddenBySupplier = isElit ? formData.hideElitSupplier : formData.hideLocalSupplier;
+                    const brand = (product.specs?.["Marca"] || "").trim().toUpperCase();
+                    const isHiddenByBrand = brand && formData.hiddenBrands?.some((b) => b.trim().toUpperCase() === brand);
+
+                    const isCurrentlyVisible = !isHiddenExplicitly && !isHiddenByStock && !isHiddenBySupplier && !isHiddenByBrand;
+
+                    return (
+                      <div
+                        key={product.id}
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                          isCurrentlyVisible
+                            ? "bg-zinc-950/60 border-zinc-800/80 hover:border-zinc-700"
+                            : "bg-rose-950/20 border-rose-900/40 opacity-75"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-3">
+                          <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-white truncate max-w-md">
+                                {product.name}
+                              </span>
+                              <span
+                                className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded uppercase ${
+                                  isElit
+                                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                                    : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                                }`}
+                              >
+                                {isElit ? "Elit" : "Local"}
+                              </span>
+                              {isOutOfStock ? (
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
+                                  Sin Stock
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">
+                                  {product.stockCount ? `${product.stockCount} un.` : "En Stock"}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-zinc-400 truncate">
+                              {product.categoryLabel} {brand ? `· ${brand}` : ""} · {formatARS(product.price)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Action Toggle Button */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!isCurrentlyVisible && (
+                            <span className="text-[10px] text-rose-400 font-mono hidden md:inline">
+                              {isHiddenExplicitly
+                                ? "Oculto manual"
+                                : isHiddenByStock
+                                ? "Oculto (Sin Stock)"
+                                : isHiddenBySupplier
+                                ? "Proveedor inactivo"
+                                : "Marca bloqueada"}
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => toggleHiddenProduct(product.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                              isCurrentlyVisible
+                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300"
+                                : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-emerald-500/20 hover:border-emerald-500/40 hover:text-emerald-300"
+                            }`}
+                          >
+                            {isCurrentlyVisible ? (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Oculto</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+          </div>
         )}
 
       </div>

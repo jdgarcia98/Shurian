@@ -23,6 +23,7 @@ export interface Product {
   features?: string[];
   specs?: Record<string, string>;
   warranty?: string;
+  supplier?: "local" | "elit";
 }
 
 export interface CartItem {

@@ -31,6 +31,14 @@ export interface BusinessSettings {
     variant: "orange" | "dark" | "emerald";
   };
 
+  // Visibilidad y Filtros de Catálogo
+  hideOutOfStock: boolean;
+  hideLocalSupplier: boolean;
+  hideElitSupplier: boolean;
+  hiddenBrands: string[];
+  hiddenCategories: string[];
+  hiddenProductIds: string[];
+
   updatedAt?: number;
 }
 
@@ -68,6 +76,12 @@ const defaultSettings: BusinessSettings = {
     link: "/catalogo",
     variant: "orange",
   },
+  hideOutOfStock: false,
+  hideLocalSupplier: false,
+  hideElitSupplier: false,
+  hiddenBrands: [],
+  hiddenCategories: [],
+  hiddenProductIds: [],
   updatedAt: 1,
 };
 

@@ -7,6 +7,8 @@ import { CatalogSidebar } from "./CatalogSidebar";
 import { useCartStore } from "@/store/useCartStore";
 import { Product, ProductCategory } from "@/types";
 import { ElitCategoryItem } from "@/services/elit";
+import { useAdminStore } from "@/store/useAdminStore";
+import { shouldShowProduct } from "@/utils/productVisibility";
 import {
   PackageOpen,
   ArrowUpDown,
@@ -34,6 +36,11 @@ export const Catalog: React.FC<CatalogProps> = ({
   availableCategories = [],
 }) => {
   const { searchQuery, setSearchQuery } = useCartStore();
+  const { settings, fetchSettings } = useAdminStore();
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const [products, setProducts] = useState<Product[]>(() => {
     if (initialProducts && initialProducts.length > 0) {
@@ -219,6 +226,9 @@ export const Catalog: React.FC<CatalogProps> = ({
       result = result.filter((p) => p.inStock);
     }
 
+    // Admin visibility filters (hide by supplier, brand, category, product ID, or out-of-stock)
+    result = result.filter((p) => shouldShowProduct(p, settings));
+
     // Sort
     switch (sortBy) {
       case "precio-menor":
@@ -241,7 +251,7 @@ export const Catalog: React.FC<CatalogProps> = ({
     }
 
     return result;
-  }, [products, selectedCategory, selectedSubCategory, selectedBrand, searchQuery, onlyInStock, sortBy]);
+  }, [products, selectedCategory, selectedSubCategory, selectedBrand, searchQuery, onlyInStock, sortBy, settings]);
 
   // Handler to load more products
   const handleLoadMore = async () => {

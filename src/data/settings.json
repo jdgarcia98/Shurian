@@ -18,5 +18,11 @@
     "text": "10% de descuento abonando en efectivo en el local (Bv. Segui 1501)",
     "link": "/catalogo",
     "variant": "orange"
-  }
+  },
+  "hideOutOfStock": false,
+  "hideLocalSupplier": false,
+  "hideElitSupplier": false,
+  "hiddenBrands": [],
+  "hiddenCategories": [],
+  "hiddenProductIds": []
 }

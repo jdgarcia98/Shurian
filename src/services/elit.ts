@@ -144,6 +144,7 @@ export function transformElitProduct(raw: ElitProductRaw): Product {
     features: features.length > 0 ? features : undefined,
     specs: Object.keys(specs).length > 0 ? specs : undefined,
     warranty: raw.garantia ? `${raw.garantia} meses de garantía oficial` : "Garantía oficial Shurian",
+    supplier: "elit",
   };
 }
 

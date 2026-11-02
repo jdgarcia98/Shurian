@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
+import { HomeFeaturedProducts } from "@/components/HomeFeaturedProducts";
 import { INITIAL_PRODUCTS } from "@/data/products";
 import { STORE_INFO } from "@/data/storeInfo";
 import { fetchElitProducts } from "@/services/elit";
@@ -56,11 +57,7 @@ export default async function HomePage() {
           </div>
 
           {/* Grid of featured products */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <HomeFeaturedProducts initialProducts={featuredProducts} />
 
           {/* Bottom Catalog CTA */}
           <div className="text-center">

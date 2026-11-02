@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchElitProducts } from "@/services/elit";
+import { filterVisibleProducts } from "@/utils/productVisibility";
+
+// Global cache or fallback reader helper
+function getServerSettings() {
+  try {
+    if (globalThis.__shurianSettings) {
+      return globalThis.__shurianSettings;
+    }
+  } catch (e) {}
+  return undefined;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,10 +31,14 @@ export async function GET(request: NextRequest) {
       marca: marca || undefined,
     });
 
+    // Apply visibility filters on server response
+    const settings = getServerSettings();
+    const visibleProducts = filterVisibleProducts(products, settings);
+
     return NextResponse.json({
       success: true,
-      products,
-      total,
+      products: visibleProducts,
+      total: visibleProducts.length !== products.length ? visibleProducts.length : total,
       offset,
       limit,
     });
