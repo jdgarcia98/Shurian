@@ -37,9 +37,17 @@ export const RepairWizardModal: React.FC = () => {
         closeRepairModal();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeRepairModal]);
+
+    if (isRepairModalOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isRepairModalOpen, closeRepairModal]);
 
   if (!isRepairModalOpen) return null;
 
@@ -114,43 +122,45 @@ export const RepairWizardModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 flex min-h-full items-center justify-center">
       {/* Backdrop */}
       <div
         onClick={closeRepairModal}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
       ></div>
 
       {/* Modal Dialog Content */}
-      <div className="relative w-full max-w-2xl rounded-3xl bg-white border border-zinc-200 p-6 sm:p-8 shadow-2xl z-10 my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-zinc-900">
+      <div className="relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] sm:max-h-[90vh] flex flex-col rounded-3xl bg-white border border-zinc-200 shadow-2xl z-10 my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-zinc-900">
         
         {/* Close button */}
         <button
           onClick={closeRepairModal}
-          className="absolute top-4 right-4 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 transition-all z-20"
+          className="absolute top-4 right-4 p-2 rounded-full bg-zinc-100/90 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 backdrop-blur transition-all z-30 shadow-sm"
           aria-label="Cerrar modal"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
-        <div className="flex items-center gap-3.5 mb-6 pb-4 border-b border-zinc-100">
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-sm shrink-0">
-            <img
-              src="/images/shurian-logo.jpg"
-              alt="Shurian Servicio Técnico"
-              className="w-full h-full object-cover"
-            />
+        {/* Scrollable body */}
+        <div className="overflow-y-auto p-6 sm:p-8 overscroll-contain flex-1">
+          {/* Header */}
+          <div className="flex items-center gap-3.5 mb-6 pb-4 border-b border-zinc-100 pr-10">
+            <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-sm shrink-0">
+              <img
+                src="/images/shurian-logo.jpg"
+                alt="Shurian Servicio Técnico"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h2 className="font-headline font-black text-xl sm:text-2xl text-zinc-950">
+                Consultar Servicio Técnico Shurian
+              </h2>
+              <p className="text-xs text-zinc-500 font-mono">
+                Diagnóstico sin cargo · Laboratorio en Bv. Segui 1501, Rosario
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-headline font-black text-xl sm:text-2xl text-zinc-950">
-              Consultar Servicio Técnico Shurian
-            </h2>
-            <p className="text-xs text-zinc-500 font-mono">
-              Diagnóstico sin cargo · Laboratorio en Bv. Segui 1501, Rosario
-            </p>
-          </div>
-        </div>
 
         {validationError && (
           <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 text-xs font-medium">
@@ -298,6 +308,7 @@ export const RepairWizardModal: React.FC = () => {
             </button>
           </div>
         </form>
+        </div>
 
       </div>
     </div>
