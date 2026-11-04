@@ -17,7 +17,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "clientes.elit.com.ar",
+      },
+      {
+        protocol: "https",
         hostname: "elit.com.ar",
+      },
+      {
+        protocol: "https",
+        hostname: "**.elit.com.ar",
       },
     ],
   },

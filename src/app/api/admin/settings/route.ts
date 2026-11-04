@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { SITE_CONFIG } from "@/config/site";
 
 // Global in-memory cache for serverless environments (e.g. Vercel)
 declare global {
@@ -14,16 +15,16 @@ const defaultSettings = {
   isOpenOverride: "auto",
   holidayMode: false,
   holidayMessage: "Hoy cerrado por feriado. Retomamos la atención habitual el próximo día hábil.",
-  hoursWeekdays: "09:00 - 13:00 hs y 16:30 - 20:00 hs",
-  hoursSaturday: "09:30 - 13:30 hs",
-  hoursSunday: "Cerrado",
-  phoneDisplay: "341 755-1501",
-  whatsappNumber: "5493417551501",
-  whatsappRepairNumber: "5493417551501",
-  instagramHandle: "@shurian.pc",
-  instagramUrl: "https://www.instagram.com/shurian.pc/",
-  address: "Bv. Segui 1501",
-  city: "Rosario, Santa Fe",
+  hoursWeekdays: SITE_CONFIG.hoursWeekdays,
+  hoursSaturday: SITE_CONFIG.hoursSaturday,
+  hoursSunday: SITE_CONFIG.hoursSunday,
+  phoneDisplay: SITE_CONFIG.phoneDisplay,
+  whatsappNumber: SITE_CONFIG.whatsappNumber,
+  whatsappRepairNumber: SITE_CONFIG.whatsappNumber,
+  instagramHandle: SITE_CONFIG.instagramHandle,
+  instagramUrl: SITE_CONFIG.instagramUrl,
+  address: SITE_CONFIG.address,
+  city: SITE_CONFIG.city,
   topBanner: {
     enabled: true,
     badge: "PROMO",

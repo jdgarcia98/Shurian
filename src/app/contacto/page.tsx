@@ -38,7 +38,7 @@ export default function ContactoPage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h2 className="font-headline font-bold text-lg text-zinc-950 mb-2">
-              Retiro Inmediato Sin Costo
+              Retiro en Local Sin Costo
             </h2>
             <p className="text-sm text-zinc-600 leading-relaxed">
               Todos los productos del catálogo web están listos para retirar en el día en nuestro local sin cargos adicionales.

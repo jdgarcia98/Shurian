@@ -195,8 +195,8 @@ export const Footer: React.FC = () => {
               </div>
               <div className="pt-2 text-[11px] text-zinc-400 leading-relaxed">
                 <p className="font-bold text-white">Horarios:</p>
-                <p>Lun a Vie: 09:00 - 13:00 / 16:30 - 20:00 hs</p>
-                <p>Sáb: 09:30 - 13:30 hs</p>
+                <p>Lun a Vie: {STORE_INFO.hoursWeekdays}</p>
+                <p>Sáb: {STORE_INFO.hoursSaturday}</p>
               </div>
               <div className="pt-1">
                 <Link

@@ -80,6 +80,7 @@ export const Hero: React.FC = () => {
                 src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop"
                 alt="Catálogo de Productos Shurian"
                 fill
+                priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -99,7 +100,7 @@ export const Hero: React.FC = () => {
                   Catálogo
                 </h2>
                 <p className="font-body text-sm text-zinc-300 leading-relaxed mb-5">
-                  Accesorios certificados, tecnología, periféricos gamer y componentes con stock y entrega inmediata en Rosario.
+                  Accesorios certificados, tecnología, periféricos gamer y componentes con stock para retiro en local o envíos coordinados en Rosario.
                 </p>
 
                 {/* Features Pills */}
@@ -300,8 +301,8 @@ export const Hero: React.FC = () => {
               <Clock className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">Entrega Inmediata</p>
-              <p className="text-[11px] text-zinc-400">Retiro o cadetería local</p>
+              <p className="text-xs font-bold text-white">Retiro en Local</p>
+              <p className="text-[11px] text-zinc-400">O envíos a coordinar</p>
             </div>
           </div>
         </div>

@@ -57,9 +57,9 @@ const defaultSettings: BusinessSettings = {
   isOpenOverride: "auto",
   holidayMode: false,
   holidayMessage: "Hoy cerrado por feriado. Retomamos la atención habitual el próximo día hábil.",
-  hoursWeekdays: "09:00 - 13:00 hs y 16:30 - 20:00 hs",
-  hoursSaturday: "09:30 - 13:30 hs",
-  hoursSunday: "Cerrado",
+  hoursWeekdays: STORE_INFO.hoursWeekdays,
+  hoursSaturday: STORE_INFO.hoursSaturday,
+  hoursSunday: STORE_INFO.hoursSunday,
 
   phoneDisplay: STORE_INFO.phoneDisplay,
   whatsappNumber: STORE_INFO.whatsappNumber,

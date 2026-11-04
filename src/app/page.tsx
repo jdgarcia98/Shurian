@@ -43,7 +43,7 @@ export default async function HomePage() {
                 Productos Destacados
               </h2>
               <p className="font-body text-sm sm:text-base text-zinc-600 mt-1">
-                Accesorios certificados y tecnología con entrega inmediata en Rosario.
+                Accesorios certificados y tecnología con retiro en local y envíos a coordinar en Rosario.
               </p>
             </div>
 
@@ -131,7 +131,7 @@ export default async function HomePage() {
               </h2>
               <p className="text-zinc-600 text-sm leading-relaxed mb-6">
                 Vení a retirar tus compras online, comprar accesorios o traer tu equipo a reparar.
-                Horarios: Lun a Vie 09:00 a 13:00 / 16:30 a 20:00 hs. Sábados 09:30 a 13:30 hs.
+                Horarios: {STORE_INFO.hoursSummary}
               </p>
               <Link
                 href="/contacto"

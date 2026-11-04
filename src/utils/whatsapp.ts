@@ -1,10 +1,11 @@
 import { CartItem, CheckoutData, RepairInquiry } from "@/types";
 import { formatARS } from "./currency";
+import { SITE_CONFIG } from "@/config/site";
 
-export const SHURIAN_WHATSAPP_NUMBER = "5493417551501";
-export const SHURIAN_PHONE_DISPLAY = "341 755-1501";
-export const SHURIAN_ADDRESS = "Bv. Segui 1501, Rosario, Santa Fe";
-export const SHURIAN_INSTAGRAM = "https://www.instagram.com/shurian.pc/";
+export const SHURIAN_WHATSAPP_NUMBER = SITE_CONFIG.whatsappNumber;
+export const SHURIAN_PHONE_DISPLAY = SITE_CONFIG.phoneDisplay;
+export const SHURIAN_ADDRESS = SITE_CONFIG.fullAddress;
+export const SHURIAN_INSTAGRAM = SITE_CONFIG.instagramUrl;
 
 /**
  * Builds the WhatsApp direct order link based on cart items and customer details.

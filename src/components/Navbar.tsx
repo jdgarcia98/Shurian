@@ -156,6 +156,7 @@ export const Navbar: React.FC = () => {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
+                  aria-label="Limpiar búsqueda"
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white px-1.5 py-0.5 rounded-full bg-zinc-800"
                 >
                   ✕
@@ -224,7 +225,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-xl border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900"
-              aria-label="Menú"
+              aria-label={mobileMenuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
             >
               {mobileMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -249,6 +250,7 @@ export const Navbar: React.FC = () => {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
+                aria-label="Limpiar búsqueda"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white"
               >
                 ✕
@@ -289,6 +291,7 @@ export const Navbar: React.FC = () => {
                 href={`https://wa.me/${settings.whatsappNumber || SHURIAN_WHATSAPP_NUMBER}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Contactar por WhatsApp a Shurian"
                 className="flex-1 text-center py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center gap-1.5"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
@@ -298,6 +301,7 @@ export const Navbar: React.FC = () => {
                 href={settings.instagramUrl || SHURIAN_INSTAGRAM}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Ir al perfil de Instagram oficial de Shurian"
                 className="px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-semibold text-center"
               >
                 Instagram

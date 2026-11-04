@@ -50,7 +50,7 @@ export const StoreInfo: React.FC = () => {
             Visítanos en nuestro local en Rosario
           </h2>
           <p className="font-body text-sm sm:text-base text-zinc-600 mt-2">
-            Estamos en {currentAddress}, {currentCity}. Vení a retirar tus compras o traé tu equipo para diagnóstico inmediato.
+            Estamos en {currentAddress}, {currentCity}. Vení a retirar tus compras o traé tu equipo para diagnóstico sin cargo.
           </p>
         </div>
 
@@ -81,6 +81,7 @@ export const StoreInfo: React.FC = () => {
                       href={STORE_INFO.googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="Cómo llegar al local en Google Maps"
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-950 text-white text-xs font-bold hover:bg-orange-500 transition-colors shadow-sm"
                     >
                       <Navigation className="w-3.5 h-3.5" />
@@ -139,6 +140,7 @@ export const StoreInfo: React.FC = () => {
                 href={`https://wa.me/${currentWhatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Contactar por WhatsApp a Shurian"
                 className="p-4 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-400 shadow-sm transition-all flex items-center gap-3 group"
               >
                 <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
@@ -158,6 +160,7 @@ export const StoreInfo: React.FC = () => {
                 href={currentInstagram}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Perfil oficial de Instagram de Shurian"
                 className="p-4 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-400 shadow-sm transition-all flex items-center gap-3 group"
               >
                 <div className="p-2.5 rounded-xl bg-orange-50 text-orange-600 group-hover:scale-105 transition-transform">
