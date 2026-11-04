@@ -1,35 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   SHURIAN_WHATSAPP_NUMBER,
   SHURIAN_INSTAGRAM,
 } from "@/utils/whatsapp";
-import { X } from "lucide-react";
 
 export const FloatingWhatsApp: React.FC = () => {
-  const [showTooltip, setShowTooltip] = useState(true);
-
   return (
     <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
-      {/* Small popover tooltip above WhatsApp */}
-      {showTooltip && (
-        <div className="hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-zinc-200 text-xs shadow-soft-lg animate-in fade-in slide-in-from-bottom-2 duration-300 text-zinc-800">
-          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-          <span>
-            ¿Dudas con una reparación o producto?{" "}
-            <strong className="text-orange-600 font-bold">¡Escribinos!</strong>
-          </span>
-          <button
-            onClick={() => setShowTooltip(false)}
-            className="text-zinc-400 hover:text-zinc-900 ml-1 p-0.5"
-            aria-label="Cerrar aviso"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
       {/* Action Buttons Stack */}
       <div className="flex flex-col items-center gap-2.5">
         {/* 1. Instagram Floating Button */}
