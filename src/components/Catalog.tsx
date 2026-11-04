@@ -306,7 +306,7 @@ export const Catalog: React.FC<CatalogProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-semibold uppercase mb-3">
               <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-              <span>Tecnología Oficial · Rosario</span>
+              <span>Accesorios & Servicio Técnico · Rosario</span>
             </div>
             <h2 className="font-headline font-black text-3xl sm:text-4xl text-zinc-950 tracking-tight">
               Catálogo de Tecnología & Accesorios
