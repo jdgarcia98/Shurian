@@ -75,7 +75,7 @@ export default function AdminPage() {
   // Catalog tab filters & live products state
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [catalogBrands, setCatalogBrands] = useState<string[]>([]);
-  const [catalogCategories, setCatalogCategories] = useState<{ nombre: string; uri: string }[]>([]);
+  const [catalogCategories, setCatalogCategories] = useState<{ nombre: string; uri: string; supplier?: string }[]>([]);
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSupplierFilter, setCatalogSupplierFilter] = useState<"todos" | "tiendanube" | "local" | "elit">("todos");
   const [loadingCatalog, setLoadingCatalog] = useState(false);
@@ -1439,6 +1439,41 @@ export default function AdminPage() {
 
             </div>
 
+            {/* BARRA DE FILTRO POR PROVEEDOR GENERAL */}
+            <div className="bg-zinc-900/90 border border-zinc-800 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-orange-400" />
+                <div>
+                  <span className="text-xs font-semibold text-white block">Filtrar vista del panel por Proveedor:</span>
+                  <span className="text-[11px] text-zinc-400">Selecciona para ver y ocultar categorías o productos específicos de ese origen</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs flex-wrap">
+                {(
+                  [
+                    { id: "todos", label: "Todos", icon: "🌐" },
+                    { id: "tiendanube", label: "Tiendanube", icon: "🛍️" },
+                    { id: "elit", label: "Elit Mayorista", icon: "🚚" },
+                    { id: "local", label: "Base Local", icon: "🏬" },
+                  ] as const
+                ).map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setCatalogSupplierFilter(f.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      catalogSupplierFilter === f.id
+                        ? "bg-orange-500 text-white shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                    }`}
+                  >
+                    <span>{f.icon}</span>
+                    <span>{f.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* SECCIÓN 2: CONTROL POR MARCAS Y CATEGORÍAS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -1502,24 +1537,35 @@ export default function AdminPage() {
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto p-1 pr-2 custom-scrollbar">
-                  {catalogCategories.map((cat) => {
-                    const isHidden = formData.hiddenCategories?.includes(cat.nombre);
-                    return (
-                      <button
-                        key={cat.nombre}
-                        type="button"
-                        onClick={() => toggleHiddenCategory(cat.nombre)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
-                          isHidden
-                            ? "bg-rose-500/15 border-rose-500/40 text-rose-300 line-through opacity-70 hover:opacity-100"
-                            : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                        }`}
-                      >
-                        {isHidden ? <EyeOff className="w-3 h-3 text-rose-400" /> : <Eye className="w-3 h-3 text-emerald-400" />}
-                        <span>{cat.nombre}</span>
-                      </button>
-                    );
-                  })}
+                  {catalogCategories
+                    .filter((cat) => {
+                      if (catalogSupplierFilter === "todos") return true;
+                      if (!cat.supplier) return true;
+                      return cat.supplier === catalogSupplierFilter;
+                    })
+                    .map((cat) => {
+                      const isHidden = formData.hiddenCategories?.includes(cat.nombre);
+                      return (
+                        <button
+                          key={`${cat.supplier || "cat"}-${cat.nombre}`}
+                          type="button"
+                          onClick={() => toggleHiddenCategory(cat.nombre)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                            isHidden
+                              ? "bg-rose-500/15 border-rose-500/40 text-rose-300 line-through opacity-70 hover:opacity-100"
+                              : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                          }`}
+                        >
+                          {isHidden ? <EyeOff className="w-3 h-3 text-rose-400" /> : <Eye className="w-3 h-3 text-emerald-400" />}
+                          <span>{cat.nombre}</span>
+                          {cat.supplier && (
+                            <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 uppercase">
+                              {cat.supplier === "tiendanube" ? "Nube" : cat.supplier}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   {catalogCategories.length === 0 && (
                     <span className="text-xs text-zinc-500">Cargando categorías del catálogo...</span>
                   )}

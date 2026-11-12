@@ -247,3 +247,34 @@ export async function fetchTiendanubeProducts(
     return memoryCache ? memoryCache.products : [];
   }
 }
+
+export async function fetchTiendanubeCategoriesAndBrands(): Promise<{
+  categorias: { nombre: string; uri: string; supplier: "tiendanube" }[];
+  marcas: string[];
+}> {
+  try {
+    const products = await fetchTiendanubeProducts();
+    const catMap = new Map<string, number>();
+    const brandSet = new Set<string>();
+
+    for (const p of products) {
+      if (p.categoryLabel) {
+        catMap.set(p.categoryLabel, (catMap.get(p.categoryLabel) || 0) + 1);
+      }
+      if (p.specs?.["Marca"]) {
+        brandSet.add(p.specs["Marca"].trim());
+      }
+    }
+
+    return {
+      categorias: Array.from(catMap.keys()).map((c) => ({
+        nombre: c,
+        uri: c.toLowerCase().replace(/\s+/g, "-"),
+        supplier: "tiendanube",
+      })),
+      marcas: Array.from(brandSet),
+    };
+  } catch (e) {
+    return { categorias: [], marcas: [] };
+  }
+}
