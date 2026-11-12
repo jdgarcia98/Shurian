@@ -35,6 +35,7 @@ export interface BusinessSettings {
   hideOutOfStock: boolean;
   hideLocalSupplier: boolean;
   hideElitSupplier: boolean;
+  hideTiendanubeSupplier?: boolean;
   hiddenBrands: string[];
   hiddenCategories: string[];
   hiddenProductIds: string[];
@@ -79,6 +80,7 @@ const defaultSettings: BusinessSettings = {
   hideOutOfStock: false,
   hideLocalSupplier: false,
   hideElitSupplier: false,
+  hideTiendanubeSupplier: false,
   hiddenBrands: [],
   hiddenCategories: [],
   hiddenProductIds: [],

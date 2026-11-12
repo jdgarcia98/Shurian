@@ -112,8 +112,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product.categoryLabel}
             </span>
             <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              {product.inStock ? "Disponible" : "Sin Stock"}
+              <span className={`w-1.5 h-1.5 rounded-full ${product.inStock ? "bg-emerald-500" : "bg-zinc-400"}`}></span>
+              {product.supplier === "tiendanube" ? "En Local" : product.inStock ? "Disponible" : "Sin Stock"}
             </span>
           </div>
 

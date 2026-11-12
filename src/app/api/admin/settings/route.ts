@@ -35,6 +35,7 @@ const defaultSettings = {
   hideOutOfStock: false,
   hideLocalSupplier: false,
   hideElitSupplier: false,
+  hideTiendanubeSupplier: false,
   hiddenBrands: [],
   hiddenCategories: [],
   hiddenProductIds: [],

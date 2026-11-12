@@ -77,7 +77,7 @@ export default function AdminPage() {
   const [catalogBrands, setCatalogBrands] = useState<string[]>([]);
   const [catalogCategories, setCatalogCategories] = useState<{ nombre: string; uri: string }[]>([]);
   const [catalogSearch, setCatalogSearch] = useState("");
-  const [catalogSupplierFilter, setCatalogSupplierFilter] = useState<"todos" | "local" | "elit">("todos");
+  const [catalogSupplierFilter, setCatalogSupplierFilter] = useState<"todos" | "tiendanube" | "local" | "elit">("todos");
   const [loadingCatalog, setLoadingCatalog] = useState(false);
 
   // Check auth session on mount (ONLY ONCE on mount)
@@ -257,7 +257,10 @@ export default function AdminPage() {
     await updateSettings({ hiddenCategories: updated });
   };
 
-  const toggleSettingBoolean = async (key: "hideOutOfStock" | "hideLocalSupplier" | "hideElitSupplier", val: boolean) => {
+  const toggleSettingBoolean = async (
+    key: "hideOutOfStock" | "hideLocalSupplier" | "hideElitSupplier" | "hideTiendanubeSupplier",
+    val: boolean
+  ) => {
     const newFormData = { ...formData, [key]: val };
     setFormData(newFormData);
     await updateSettings({ [key]: val });
@@ -1303,7 +1306,7 @@ export default function AdminPage() {
             </div>
 
             {/* SECCIÓN 1: REGLAS GLOBALES Y PROVEEDORES */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               
               {/* Card 1: Filtro de Stock Cero */}
               <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors">
@@ -1371,7 +1374,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
                       <Store className="w-4 h-4 text-orange-400" />
-                      Stock Local (Shurian Rosario)
+                      Stock Base Local
                     </span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -1384,13 +1387,52 @@ export default function AdminPage() {
                     </label>
                   </div>
                   <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    Artículos curados propios del local (vidrios, fundas, cables, teclados, servicios técnicos en Bv. Segui 1501).
+                    Artículos curados propios del local (vidrios, fundas, cables, servicios técnicos en Bv. Segui 1501).
                   </p>
                 </div>
                 <div className="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-400 flex items-center justify-between">
                   <span>Visibilidad:</span>
                   <span className={!formData.hideLocalSupplier ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
                     {!formData.hideLocalSupplier ? "ACTIVO / VISIBLE" : "OCULTO EN LA WEB"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 4: Tiendanube Conectada */}
+              <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                      <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                      Tiendanube
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!(formData.hideTiendanubeSupplier ?? false)}
+                        onChange={(e) => toggleSettingBoolean("hideTiendanubeSupplier", !e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500" />
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed mb-3">
+                    Catálogo sincronizado desde tu Tiendanube con webhooks automáticos.
+                  </p>
+                  <a
+                    href="/api/tiendanube/authorize"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Conectar / Autorizar
+                  </a>
+                </div>
+                <div className="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Visibilidad:</span>
+                  <span className={!formData.hideTiendanubeSupplier ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                    {!formData.hideTiendanubeSupplier ? "ACTIVO / VISIBLE" : "OCULTO EN LA WEB"}
                   </span>
                 </div>
               </div>
@@ -1505,8 +1547,9 @@ export default function AdminPage() {
                     {(
                       [
                         { id: "todos", label: "Todos" },
-                        { id: "local", label: "Local" },
+                        { id: "tiendanube", label: "Tiendanube" },
                         { id: "elit", label: "Elit" },
+                        { id: "local", label: "Base Local" },
                       ] as const
                     ).map((f) => (
                       <button
@@ -1544,8 +1587,10 @@ export default function AdminPage() {
                   .filter((p) => {
                     // Supplier filter
                     const isElit = p.id.startsWith("elit-") || p.supplier === "elit";
-                    if (catalogSupplierFilter === "local" && isElit) return false;
+                    const isTiendanube = p.id.startsWith("tiendanube-") || p.supplier === "tiendanube";
+                    if (catalogSupplierFilter === "tiendanube" && !isTiendanube) return false;
                     if (catalogSupplierFilter === "elit" && !isElit) return false;
+                    if (catalogSupplierFilter === "local" && (isElit || isTiendanube)) return false;
 
                     // Text search
                     if (catalogSearch.trim()) {
@@ -1560,10 +1605,15 @@ export default function AdminPage() {
                   .slice(0, 80)
                   .map((product) => {
                     const isElit = product.id.startsWith("elit-") || product.supplier === "elit";
+                    const isTiendanube = product.id.startsWith("tiendanube-") || product.supplier === "tiendanube";
                     const isHiddenExplicitly = formData.hiddenProductIds?.includes(product.id);
                     const isOutOfStock = !product.inStock;
                     const isHiddenByStock = formData.hideOutOfStock && isOutOfStock;
-                    const isHiddenBySupplier = isElit ? formData.hideElitSupplier : formData.hideLocalSupplier;
+                    const isHiddenBySupplier = isElit
+                      ? formData.hideElitSupplier
+                      : isTiendanube
+                      ? formData.hideTiendanubeSupplier
+                      : formData.hideLocalSupplier;
                     const brand = (product.specs?.["Marca"] || "").trim().toUpperCase();
                     const isHiddenByBrand = brand && formData.hiddenBrands?.some((b) => b.trim().toUpperCase() === brand);
 
@@ -1594,12 +1644,14 @@ export default function AdminPage() {
                               </span>
                               <span
                                 className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded uppercase ${
-                                  isElit
+                                  isTiendanube
+                                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                    : isElit
                                     ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
                                     : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                                 }`}
                               >
-                                {isElit ? "Elit" : "Local"}
+                                {isTiendanube ? "Tiendanube" : isElit ? "Elit" : "Local"}
                               </span>
                               {isOutOfStock ? (
                                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">

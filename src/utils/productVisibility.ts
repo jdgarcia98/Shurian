@@ -14,9 +14,13 @@ export function shouldShowProduct(
 
   // 2. Supplier filter
   const isElit = product.id.startsWith("elit-") || product.supplier === "elit";
-  const isLocal = !isElit || product.supplier === "local";
+  const isTiendanube = product.id.startsWith("tiendanube-") || product.supplier === "tiendanube";
+  const isLocal = !isElit && !isTiendanube;
 
   if (isElit && settings.hideElitSupplier) {
+    return false;
+  }
+  if (isTiendanube && settings.hideTiendanubeSupplier) {
     return false;
   }
   if (isLocal && settings.hideLocalSupplier) {
