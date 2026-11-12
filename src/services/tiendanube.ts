@@ -176,12 +176,40 @@ export interface FetchTiendanubeParams {
   forceRefresh?: boolean;
 }
 
+export function getTiendanubeCredentials(): { storeId?: string; accessToken?: string; userAgent: string } {
+  let storeId = process.env.TIENDANUBE_STORE_ID;
+  let accessToken = process.env.TIENDANUBE_ACCESS_TOKEN;
+
+  if ((!storeId || !accessToken) && (globalThis as any).__shurianSettings) {
+    const s = (globalThis as any).__shurianSettings;
+    storeId = storeId || s.tiendanubeStoreId;
+    accessToken = accessToken || s.tiendanubeAccessToken;
+  }
+
+  if (!storeId || !accessToken) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const tmpPath = path.join("/tmp", "shurian_tiendanube.json");
+      if (fs.existsSync(tmpPath)) {
+        const data = JSON.parse(fs.readFileSync(tmpPath, "utf-8"));
+        storeId = storeId || String(data.storeId);
+        accessToken = accessToken || data.accessToken;
+      }
+    } catch (e) {}
+  }
+
+  return {
+    storeId: storeId ? String(storeId).trim() : undefined,
+    accessToken: accessToken ? String(accessToken).trim() : undefined,
+    userAgent: process.env.TIENDANUBE_USER_AGENT || "Shurian (contacto@shurian.com.ar)",
+  };
+}
+
 export async function fetchTiendanubeProducts(
   params: FetchTiendanubeParams = {}
 ): Promise<Product[]> {
-  const storeId = process.env.TIENDANUBE_STORE_ID;
-  const accessToken = process.env.TIENDANUBE_ACCESS_TOKEN;
-  const userAgent = process.env.TIENDANUBE_USER_AGENT || "Shurian (contacto@shurian.com.ar)";
+  const { storeId, accessToken, userAgent } = getTiendanubeCredentials();
 
   // If not configured, gracefully return empty array
   if (!storeId || !accessToken) {
