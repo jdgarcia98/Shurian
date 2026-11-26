@@ -37,13 +37,28 @@ export default async function CatalogoPage() {
     ])
   ).sort((a, b) => a.localeCompare(b));
 
+  const seenCats = new Set<string>();
+  const combinedCategories = [
+    ...(tiendanubeCategoriesData.categorias || []).map((c) => ({
+      nombre: c.nombre,
+      uri: `tn-${c.uri}`,
+      sub_categorias: [],
+    })),
+    ...(elitCategoriesData.categorias || []),
+  ].filter((c) => {
+    const key = c.nombre.trim().toLowerCase();
+    if (seenCats.has(key)) return false;
+    seenCats.add(key);
+    return true;
+  });
+
   return (
     <div className="pt-52 sm:pt-56 md:pt-32 pb-16 bg-white min-h-screen">
       <Catalog
         initialProducts={combinedProducts}
         initialTotal={combinedTotal}
         availableBrands={combinedBrands}
-        availableCategories={elitCategoriesData.categorias || []}
+        availableCategories={combinedCategories}
       />
     </div>
   );

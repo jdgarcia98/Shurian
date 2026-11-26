@@ -31,7 +31,13 @@ export async function GET(request: NextRequest) {
       try {
         const allTn = await fetchTiendanubeProducts();
         tiendanubeProducts = allTn.filter((p) => {
-          if (category && category !== "todos" && p.category !== category) return false;
+          if (category && category !== "todos") {
+            const catLower = category.toLowerCase();
+            const matchesCat =
+              p.category.toLowerCase() === catLower ||
+              p.categoryLabel.toLowerCase().includes(catLower);
+            if (!matchesCat) return false;
+          }
           if (search && !p.name.toLowerCase().includes(search) && !p.description.toLowerCase().includes(search)) return false;
           if (marca && !(p.specs?.["Marca"]?.toLowerCase().includes(marca))) return false;
           return true;
