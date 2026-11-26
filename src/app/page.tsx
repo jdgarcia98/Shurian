@@ -6,6 +6,7 @@ import { HomeFeaturedProducts } from "@/components/HomeFeaturedProducts";
 import { INITIAL_PRODUCTS } from "@/data/products";
 import { STORE_INFO } from "@/data/storeInfo";
 import { fetchElitProducts } from "@/services/elit";
+import { fetchTiendanubeProducts } from "@/services/tiendanube";
 import {
   Sparkles,
   ArrowRight,
@@ -17,13 +18,21 @@ import {
   Phone,
 } from "lucide-react";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function HomePage() {
-  // Select top featured products combining curated items with live in-stock supplier products
-  const { products: elitProducts } = await fetchElitProducts({ limit: 12 });
+  // Select top featured products combining Tiendanube, curated items, and live in-stock Elit products
+  const [tiendanubeProducts, { products: elitProducts }] = await Promise.all([
+    fetchTiendanubeProducts().catch(() => []),
+    fetchElitProducts({ limit: 12 }).catch(() => ({ products: [] })),
+  ]);
+  const inStockTiendanube = tiendanubeProducts.filter((p) => p.inStock).slice(0, 4);
   const inStockElit = elitProducts.filter((p) => p.inStock).slice(0, 4);
-  const featuredProducts = [...INITIAL_PRODUCTS.slice(0, 4), ...inStockElit];
+  const featuredProducts = [
+    ...inStockTiendanube,
+    ...INITIAL_PRODUCTS.slice(0, 4),
+    ...inStockElit,
+  ];
 
   return (
     <div className="bg-white">

@@ -27,6 +27,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.elit.com.ar",
       },
+      {
+        protocol: "https",
+        hostname: "**.mitiendanube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.tiendanube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cloudfront.net",
+      },
     ],
   },
 };
